@@ -1,0 +1,37 @@
+# Node modules
+node_modules/
+frontend/node_modules/
+server/node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+frontend/dist/
+server/dist/
+
+# Env files
+.env
+.env.local
+.env.*.local
+server/.env
+frontend/.env
+
+# Build output
+build/
+dist/
+
+# OS/system files
+.DS_Store
+Thumbs.db
+
+# Vite cache
+frontend/.vite/
+
+# Firebase key
+server/keys/
+# Ignore only Firebase key JSON files
+server/keys/*.json
+server/promptshield-*.json
