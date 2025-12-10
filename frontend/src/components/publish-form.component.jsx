@@ -1,11 +1,12 @@
 import { Toaster, toast } from "react-hot-toast";
 import AnimationWrapper from "../common/page-animation";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { EditorContext } from "../pages/editor.pages";
 import Tag from "./tags.component";
 import axios from "axios";
 import { UserContext } from "../App";
 import { useNavigate, useParams } from "react-router-dom";
+import { ALLOWED_CATEGORIES } from "../common/categories";
 
 const PublishForm = () => {
 
@@ -19,6 +20,8 @@ const PublishForm = () => {
     let { userAuth: { access_token } } = useContext(UserContext);
 
     let navigate = useNavigate();
+
+    const [searchTerm, setSearchTerm] = useState("");
 
     const handleCloseEvent = () => {
         setEditorState("editor")
@@ -42,24 +45,24 @@ const PublishForm = () => {
         }
     }
 
-    const handleKeyDown = (e) => {
-        if(e.keyCode == 13 || e.keyCode == 188) {
-            e.preventDefault();
+    // const handleKeyDown = (e) => {
+    //     if(e.keyCode == 13 || e.keyCode == 188) {
+    //         e.preventDefault();
 
-            let tag = e.target.value;
+    //         let tag = e.target.value;
 
-            if(tags.length < tagLimit){
-                if(!tags.includes(tag) && tag.length){
-                    setBlog({ ...blog, tags: [ ...tags, tag ] })
-                }
-            } else{
-                toast.error(`You can add max ${tagLimit} Tags`)
-            }
+    //         if(tags.length < tagLimit){
+    //             if(!tags.includes(tag) && tag.length){
+    //                 setBlog({ ...blog, tags: [ ...tags, tag ] })
+    //             }
+    //         } else{
+    //             toast.error(`You can add max ${tagLimit} Tags`)
+    //         }
             
-            e.target.value = "";
-        }
+    //         e.target.value = "";
+    //     }
 
-    }
+    // }
 
     const publishBlog = (e) => {
 
@@ -156,7 +159,7 @@ const PublishForm = () => {
                     
                     <p className="text-dark-grey mb-2 mt-9">Topics - ( Helps is searching and ranking your blog post )</p>
 
-                    <div className="relative input-box pl-2 py-2 pb-4">
+                    {/* <div className="relative input-box pl-2 py-2 pb-4">
                         <input type="text" placeholder="Topic" className="sticky input-box bg-white top-0 left-0  pl-4 mb-3 focus:bg-white "
                         onKeyDown={handleKeyDown}
                          />
@@ -166,7 +169,54 @@ const PublishForm = () => {
                                 return <Tag tag={tag} tagIndex={i} key={i} />
                             }) 
                         }
+                    </div> */}
+
+                    <div className="relative input-box p-4">
+
+                        {/* Search input */}
+                        <input
+                            type="text"
+                            placeholder="Search topics..."
+                            className="w-full border px-3 py-2 rounded-md mb-3 focus:outline-none focus:border-black"
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value.toLowerCase());
+                            }}
+                        />
+
+                        {/* Dropdown list */}
+                        <div className="border rounded-md max-h-40 overflow-y-auto bg-white">
+                            {ALLOWED_CATEGORIES
+                                .filter(c => 
+                                    c.toLowerCase().includes(searchTerm) && 
+                                    !tags.includes(c)
+                                )
+                                .map((category, i) => (
+                                    <div
+                                        key={i}
+                                        className="px-3 py-2 cursor-pointer hover:bg-grey"
+                                        onClick={() => {
+                                            if (tags.length >= tagLimit) {
+                                                toast.error(`You can select max ${tagLimit} tags`);
+                                                return;
+                                            }
+                                            setBlog({ ...blog, tags: [...tags, category] });
+                                        }}
+                                    >
+                                        {category}
+                                    </div>
+                                ))
+                            }
+                        </div>
+
+                        {/* Show selected tags as chips */}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {tags.map((tag, i) => (
+                                <Tag tag={tag} key={i} tagIndex={i} />
+                            ))}
+                        </div>
+
                     </div>
+
 
                     <p className="mt-1 mb-4 text-dark-grey text-right" >{ tagLimit - tags.length } Tags left</p>
 

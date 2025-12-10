@@ -9,6 +9,8 @@ import { activeTabRef } from "../components/inpage-navigation.component";
 import NoDataMessage from "../components/nodata.component";
 import { filterPaginationData } from "../common/filter-pagination-data";
 import LoadMoreDataBtn from "../components/load-more.component";
+import { Link } from "react-router-dom";
+
 
 const HomePage = () => {
     let [blogs, setBlog] = useState(null);
@@ -16,15 +18,17 @@ const HomePage = () => {
     let [ pageState, setPageState ] = useState("home");
 
     let categories = [
-        "programming",
-        "hollywood",
-        "film making",
-        "social media",
-        "cooking",
-        "tech",
-        "finance",
-        "travel",
+        "AI Safety", "Prompt Engineering", "Cybersecurity", "Threat Detection",
+        "Malicious Prompts", "Ethical AI", "Data Privacy", "Machine Learning",
+        "AI Governance", "AI Alignment", "AI Policy", "Responsible AI",
+        "AI Risks", "LLM Safeguards", "Adversarial Prompts", "Dataset Security",
+        "Vulnerability Research", "Deep Learning", "NLP", "Red Teaming",
+        "Blue Teaming", "AI For Society", "AI Bias Mitigation", "Secure Architecture",
+        "Reinforcement Learning", "Digital Forensics", "Autonomous System Safety",
     ];
+
+    const [showAllCategories, setShowAllCategories] = useState(false);
+    const visibleCategories = showAllCategories ? categories : categories.slice(0, 8);
 
     const fetchLatestBlogs = ({ page = 1 }) => {
         axios
@@ -173,19 +177,36 @@ const HomePage = () => {
                 <div className="min-w-[40%] lg:min-w-[400px] max-w-min border-l border-grey pl-8 pt-3 max-md:hidden">
                     <div className="flex flex-col gap-10">
                         <div>
-                            <h1 className="font-medium text-xl mb-8">
-                                Stories form all interests
-                            </h1>
+                            <h1 className="font-medium text-xl mb-4">Stories form all interests</h1>
 
-                            <div className="flex gap-3 flex-wrap">
-                                {categories.map((category, i) => {
-                                    return (
-                                        <button onClick={loadBlogByCategory} className={"tag " + (pageState == category ? " bg-black text-white " : " ")} 
-                                        key={i}>
-                                            {category}
-                                        </button>
-                                    );
-                                })}
+                            <div className="flex flex-wrap gap-4">
+                                {visibleCategories.map((tag, i) => (
+                                    <Link
+                                        key={i}
+                                        to={`/search/${tag}`}
+                                        className="tag bg-grey hover:bg-grey/60"
+                                    >
+                                        {tag}
+                                    </Link>
+                                ))}
+                            </div>
+
+                            <div className="mt-4">
+                                {!showAllCategories ? (
+                                    <button
+                                        className="text-black underline hover:opacity-70"
+                                        onClick={() => setShowAllCategories(true)}
+                                    >
+                                        Load more
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="text-black underline hover:opacity-70"
+                                        onClick={() => setShowAllCategories(false)}
+                                    >
+                                        Show less
+                                    </button>
+                                )}
                             </div>
                         </div>
 
