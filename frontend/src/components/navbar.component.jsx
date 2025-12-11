@@ -6,6 +6,8 @@ import { ThemeContext, UserContext } from '../App';
 import UserNavigationPanel from "./user-navigation.component";
 import axios from "axios";
 import { storeInSession } from "../common/session";
+import Footer from "./footer.component";
+
 
 const Navbar = () => {
 
@@ -67,7 +69,8 @@ const Navbar = () => {
     }
 
     return (
-        <>
+        <div className="min-h-screen flex flex-col">
+
             <nav className="navbar z-50">
 
                 <Link to="/" className="flex-none w-10">
@@ -141,8 +144,13 @@ const Navbar = () => {
 
             </nav>
 
-            <Outlet />
-        </>
+            <div className="flex-1">
+                <Outlet />
+            </div>
+
+            <Footer /> 
+
+        </div>
     )
 }
 

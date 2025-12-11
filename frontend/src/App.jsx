@@ -14,6 +14,11 @@ import ChangePassword from "./pages/change-password.page";
 import EditProfile from "./pages/edit-profile.page";
 import Notifications from "./pages/notifications.page";
 import ManageBlogs from "./pages/manage-blogs.page";
+import HelpPage from "./pages/help.page";
+import AboutPage from "./pages/about.page";
+import PrivacyPage from "./pages/privacy.page";
+import RulesPage from "./pages/rules.page";
+import TermsPage from "./pages/terms.page";
 
 export const UserContext = createContext({})
 
@@ -65,6 +70,14 @@ const App = () => {
                             <Route path="edit-profile" element={<EditProfile />} />
                             <Route path="change-password" element={<ChangePassword />} />
                         </Route>
+
+                        {/* NEW FOOTER PAGES */}
+                        <Route path="help" element={<HelpPage />} />
+                        <Route path="about" element={<AboutPage />} />
+                        <Route path="privacy" element={<PrivacyPage />} />
+                        <Route path="rules" element={<RulesPage />} />
+                        <Route path="terms" element={<TermsPage />} />
+
                         <Route path="signin" element={<UserAuthForm type="sign-in" />} /> 
                         <Route path="signup" element={<UserAuthForm type="sign-up" />} />
                         <Route path="search/:query" element={<SearchPage />} />
