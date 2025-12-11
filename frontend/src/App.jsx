@@ -14,6 +14,10 @@ import ChangePassword from "./pages/change-password.page";
 import EditProfile from "./pages/edit-profile.page";
 import Notifications from "./pages/notifications.page";
 import ManageBlogs from "./pages/manage-blogs.page";
+import PromptAnalyzer from "./pages/prompt-analyzer.page";
+import AdminPage from "./pages/admin.page";
+{/*import AdminDashboard from "./pages/admin-dashboard.page";*/}
+
 
 export const UserContext = createContext({})
 
@@ -49,10 +53,26 @@ const App = () => {
     }, [])
 
 
+    const AdminRoute = ({ children }) => {
+    if (!userAuth?.access_token) {
+        return <Navigate to="/signin" />;
+    }
+
+    if (!userAuth?.isAdmin) {
+        return <Navigate to="/" />;
+    }
+
+    return children;
+};
+
+
     return (
         <ThemeContext.Provider value={{ theme, setTheme }}>
             <UserContext.Provider value={{userAuth, setUserAuth}}>
                 <Routes>
+                  <Route path="/analyze" element={<PromptAnalyzer />} />  {/*OK */} {/*OK@*/}
+                  <Route path="/admin" element={<AdminRoute> <AdminPage /> </AdminRoute>}/>
+                  {/*<Route path="/admin" element={<AdminDashboard />} />  */}
                     <Route path="/editor" element={<Editor />} />
                     <Route path="/editor/:blog_id" element={<Editor />} />
                     <Route path="/" element={<Navbar />}> 

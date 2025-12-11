@@ -9,6 +9,8 @@ import admin from "firebase-admin";
 import serviceAccountKey from "./keys/serviceAccount.json" assert { type: "json" }
 import { getAuth } from "firebase-admin/auth";
 import aws from "aws-sdk";
+import isAdmin from "./utils/isAdmin.js";
+
 
 // import dotenv from "dotenv";
 // import { readFileSync } from "fs";
@@ -81,11 +83,19 @@ const verifyJWT = (req, res, next) => {
             return res.status(403).json({ error: "Access token is invalid" })
         }
 
-        req.user = user.id
-        next()
+        req.user = user.id;
+        next();
     })
 
 }
+ const verifyAdmin = async (req, res, next) => {
+    const user = await User.findById(req.user);
+
+    if (!user || !user.isAdmin) {
+        return res.status(403).json({ error: "Admin access denied" });
+    }
+    next();
+    }
 
 const formatDatatoSend = (user) => {
 
@@ -93,6 +103,7 @@ const formatDatatoSend = (user) => {
 
     return {
         access_token,
+        isAdmin: user.isAdmin,
         profile_img: user.personal_info.profile_img,
         username: user.personal_info.username,
         fullname: user.personal_info.fullname
@@ -142,7 +153,8 @@ server.post("/signup", (req, res) => {
         let username = await generateUsername(email);
 
         let user = new User({
-            personal_info: { fullname, email, password: hashed_password, username }
+            personal_info: { fullname, email, password: hashed_password, username },
+            isAdmin: false // or manually set true ONLY when creating the admin for the first time
         })
 
         user.save().then((u) => {
@@ -304,7 +316,7 @@ server.post('/latest-blogs', (req, res) => {
 
     let maxLimit = 5;
 
-    Blog.find({ draft: false })
+    Blog.find({ draft: false, hidden: { $ne: true } })
     .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")
     .sort({ "publishedAt": -1 })
     .select("blog_id title des banner activity tags publishedAt -_id")
@@ -334,7 +346,7 @@ server.post("/all-latest-blogs-count", (req, res) => {
 
 server.get("/trending-blogs", (req, res) => {
 
-    Blog.find({ draft: false })
+    Blog.find({ draft: false, hidden: { $ne: true } })
     .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")
     .sort({ "activity.total_read": -1, "activity.total_likes": -1, "publishedAt": -1 })
     .select("blog_id title publishedAt -_id")
@@ -979,6 +991,51 @@ server.post("/delete-blog", verifyJWT, (req, res) => {
     })
 
 })
+
+server.get("/admin/all-blogs", verifyJWT, verifyAdmin, async (req, res) => {
+    try {
+        const blogs = await Blog.find({})
+            .populate("author", "personal_info.username personal_info.fullname");
+
+        return res.status(200).json({ blogs });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+})
+
+server.post("/admin/delete-blog", verifyJWT, verifyAdmin, async (req, res) => {
+    const { blog_id } = req.body;
+
+    try {
+        const blog = await Blog.findOneAndDelete({ blog_id });
+
+        if (!blog) {
+            return res.status(404).json({ error: "Blog not found" });
+        }
+
+        await Notification.deleteMany({ blog: blog._id });
+        await Comment.deleteMany({ blog_id: blog._id });
+
+        return res.status(200).json({ status: "Blog deleted by admin" });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+})
+
+server.post("/admin/toggle-blog-visibility", verifyJWT, verifyAdmin, async (req, res) => {
+    const { blog_id, hidden } = req.body;
+
+    try {
+        await Blog.findOneAndUpdate({ blog_id }, { hidden });
+
+        return res.status(200).json({
+            status: hidden ? "Blog hidden" : "Blog visible"
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+})
+
 
 
 server.listen(PORT, () => {

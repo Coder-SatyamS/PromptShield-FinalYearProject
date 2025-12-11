@@ -16,7 +16,7 @@ const Navbar = () => {
 
     let navigate = useNavigate();
 
-    const { userAuth, userAuth: { access_token, profile_img, new_notification_available }, setUserAuth } = useContext(UserContext);
+    const { userAuth, userAuth: { access_token, profile_img, new_notification_available,isAdmin }, setUserAuth } = useContext(UserContext);
 
     useEffect(() => {
 
@@ -91,6 +91,15 @@ const Navbar = () => {
                     >
                         <i className="fi fi-rr-search text-xl"></i>
                     </button>
+
+                    <Link to="/analyze" className="link">Analyze</Link>
+
+                    {isAdmin && (
+                        <Link to="/admin" className="link">
+                        Admin
+                        </Link>
+                    )}
+
 
                     <Link to="/editor" className="hidden md:flex gap-2 link">
                         <i className="fi fi-rr-file-edit"></i>
