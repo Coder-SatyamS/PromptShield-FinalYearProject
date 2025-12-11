@@ -10,6 +10,7 @@ import serviceAccountKey from "./keys/serviceAccount.json" assert { type: "json"
 import { getAuth } from "firebase-admin/auth";
 import aws from "aws-sdk";
 import isAdmin from "./utils/isAdmin.js";
+import Prompt from "./Schema/Prompt.js";
 
 
 // import dotenv from "dotenv";
@@ -1035,6 +1036,24 @@ server.post("/admin/toggle-blog-visibility", verifyJWT, verifyAdmin, async (req,
         return res.status(500).json({ error: err.message });
     }
 })
+
+
+server.post("/save-prompt", verifyJWT, async (req, res) => {
+    try {
+        const { prompt, result } = req.body;
+
+        const saved = await Prompt.create({
+            user: req.user,
+            prompt,
+            result
+        });
+
+        return res.status(200).json({ status: "success", saved });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
 
 
 
