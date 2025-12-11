@@ -113,7 +113,7 @@
 
     .blog-index{
         @apply text-4xl sm:text-3xl lg:text-5xl font-bold text-grey leading-none;
-    }
+    }       
 }
 
 .ce-block__content, .ce-toolbar__content{

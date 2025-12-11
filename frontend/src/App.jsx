@@ -14,6 +14,10 @@ import ChangePassword from "./pages/change-password.page";
 import EditProfile from "./pages/edit-profile.page";
 import Notifications from "./pages/notifications.page";
 import ManageBlogs from "./pages/manage-blogs.page";
+import PromptAnalyzer from "./pages/prompt-analyzer.page";
+import AdminPage from "./pages/admin.page";
+{/*import AdminDashboard from "./pages/admin-dashboard.page";*/}
+
 import HelpPage from "./pages/help.page";
 import AboutPage from "./pages/about.page";
 import PrivacyPage from "./pages/privacy.page";
@@ -54,10 +58,26 @@ const App = () => {
     }, [])
 
 
+    const AdminRoute = ({ children }) => {
+    if (!userAuth?.access_token) {
+        return <Navigate to="/signin" />;
+    }
+
+    if (!userAuth?.isAdmin) {
+        return <Navigate to="/" />;
+    }
+
+    return children;
+};
+
+
     return (
         <ThemeContext.Provider value={{ theme, setTheme }}>
             <UserContext.Provider value={{userAuth, setUserAuth}}>
                 <Routes>
+                  <Route path="/analyze" element={<PromptAnalyzer />} />  {/*OK */} {/*OK@*/}
+                  <Route path="/admin" element={<AdminRoute> <AdminPage /> </AdminRoute>}/>
+                  {/*<Route path="/admin" element={<AdminDashboard />} />  */}
                     <Route path="/editor" element={<Editor />} />
                     <Route path="/editor/:blog_id" element={<Editor />} />
                     <Route path="/" element={<Navbar />}> 

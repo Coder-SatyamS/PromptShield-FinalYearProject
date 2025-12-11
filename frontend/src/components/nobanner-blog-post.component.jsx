@@ -23,4 +23,36 @@ const MinimalBlogPost = ({ blog, index }) => {
     )
 }
 
+// new
+
+
+// const MinimalBlogPost = ({ blog }) => {
+//     const author = blog.author;
+
+//     return (
+//         <Link to={`/blog/${blog.blog_id}`} className="blog-card">
+
+//             <h2 className="blog-title">{blog.title}</h2>
+
+//             <p className="blog-des">{blog.des}</p>
+
+//             {/* SAFE AUTHOR INFO */}
+//             <div className="author-info">
+//                 <img
+//                     src={author?.personal_info?.profile_img || "/default-user.png"}
+//                     className="w-8 h-8 rounded-full"
+//                 />
+
+//                 <p className="text-sm">
+//                     {author?.personal_info?.username || "Unknown Author"}
+//                 </p>
+//             </div>
+
+//         </Link>
+//     );
+// };
+
+//export default MinimalBlogPost;
+
+
 export default MinimalBlogPost;
