@@ -183,7 +183,8 @@ const HomePage = () => {
                                 {visibleCategories.map((tag, i) => (
                                     <Link
                                         key={i}
-                                        to={`/search/${tag}`}
+                                        // to={`/search/${tag}`}
+                                        to={`/search?tag=${encodeURIComponent(tag.toLowerCase())}`}
                                         className="tag bg-grey hover:bg-grey/60"
                                     >
                                         {tag}

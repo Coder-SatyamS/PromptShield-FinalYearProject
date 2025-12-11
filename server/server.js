@@ -348,69 +348,120 @@ server.get("/trending-blogs", (req, res) => {
 
 })
 
-server.post("/search-blogs", (req, res) => {
+server.post("/search-blogs", async (req, res) => {
+    try {
+        console.log("🔥 Incoming Search Payload:", req.body);
 
-    let { tag, query, author, page, limit, eliminate_blog } = req.body;
+        let { tag, query, author, page = 1, limit, eliminate_blog } = req.body;
 
-    let findQuery;
+        console.log("tag:", tag, "query:", query, "author:", author);
 
-    if(tag){
-        findQuery = { tags: tag, draft: false, blog_id: { $ne: eliminate_blog } };
-    } else if(query){
-        findQuery = { draft: false, title: new RegExp(query, 'i') } 
-    } else if(author) {
-        findQuery = { author, draft: false }
+        let maxLimit = limit ? limit : 5;
+        let findQuery = { draft: false };
+
+        // DIRECT AUTHOR SEARCH
+        if (author) {
+            findQuery.author = author;
+        }
+
+        // TAG SEARCH
+        else if (tag) {
+            findQuery.tags = tag.toLowerCase();
+        }
+
+        // TEXT SEARCH (TITLE or TAG)
+        else if (query) {
+
+            const regex = new RegExp(query, "i");
+
+            findQuery.$or = [
+                { title: regex },
+                { tags: regex }
+            ];
+
+            // Username match
+            const user = await User.findOne({
+                $or: [
+                    { "personal_info.username": new RegExp(query, "i") },
+                    { "personal_info.fullname": new RegExp(query, "i") }
+                ]
+            });
+
+            if (user) {
+                findQuery.author = user._id;
+            }
+        }
+
+        console.log("Final Mongo Query:", findQuery);
+
+        // Perform DB query
+        const blogs = await Blog.find(findQuery)
+            .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname")
+            .sort({ publishedAt: -1 })
+            .skip((page - 1) * maxLimit)
+            .limit(maxLimit)
+            .select("blog_id title des banner activity tags publishedAt");
+
+        console.log("📚 Blogs found:", blogs.length);
+
+        return res.status(200).json({ blogs });
+
+    } catch (err) {
+        console.error("❌ Search Error:", err);
+        return res.status(500).json({ error: err.message });
     }
+});
 
-    let maxLimit = limit ? limit : 2;
-    
-    Blog.find(findQuery)
-    .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")
-    .sort({ "publishedAt": -1 })
-    .select("blog_id title des banner activity tags publishedAt -_id")
-    .skip((page - 1) * maxLimit)
-    .limit(maxLimit)
-    .then(blogs => {
-        return res.status(200).json({ blogs })
-    })
-    .catch(err => {
-        return res.status(500).json({ error: err.message })
-    })
 
-})
+server.post("/search-blogs-count", async (req, res) => {
+    try {
+        let { tag, query } = req.body;
+        let findQuery = { draft: false };
 
-server.post("/search-blogs-count", (req, res) => {
+        if (tag) {
+            findQuery.tags = tag.toLowerCase();
+        }
+        else if (query) {
+            const regex = new RegExp(query, "i");
 
-    let { tag, author, query } = req.body;
+            findQuery.$or = [
+                { title: regex },
+                { tags: regex }
+            ];
 
-    let findQuery;
+            const user = await User.findOne({
+                "personal_info.username": regex
+            });
 
-    if(tag){
-        findQuery = { tags: tag, draft: false };
-    } else if(query){
-        findQuery = { draft: false, title: new RegExp(query, 'i') } 
-    } else if(author) {
-        findQuery = { author, draft: false }
+            if (user) {
+                findQuery.author = user._id;
+            }
+        }
+
+        const count = await Blog.countDocuments(findQuery);
+        return res.status(200).json({ totalDocs: count });
+
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
     }
+});
 
-    Blog.countDocuments(findQuery)
-    .then(count => {
-        return res.status(200).json({ totalDocs: count })
-    })
-    .catch(err => {
-        console.log(err.message);
-        return res.status(500).json({ error: err.message })
-    })
 
-})
 
 server.post("/search-users", (req, res) => {
 
     let { query } = req.body;
 
-    User.find({ "personal_info.username": new RegExp(query, 'i') })
+    // User.find({ "personal_info.username": new RegExp(query, 'i') })
+    User.find({
+        $or: [
+            { "personal_info.username": new RegExp(query, "i") },
+            { "personal_info.fullname": new RegExp(query, "i") }
+        ]
+    })
     .limit(50)
-    .select("personal_info.fullname personal_info.username personal_info.profile_img -_id")
+    // .select("personal_info.fullname personal_info.username personal_info.profile_img -_id")
+    .select("personal_info.fullname personal_info.username personal_info.profile_img")
     .then(users => {
         return res.status(200).json({ users })
     })

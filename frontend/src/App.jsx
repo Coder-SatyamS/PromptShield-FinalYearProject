@@ -80,7 +80,8 @@ const App = () => {
 
                         <Route path="signin" element={<UserAuthForm type="sign-in" />} /> 
                         <Route path="signup" element={<UserAuthForm type="sign-up" />} />
-                        <Route path="search/:query" element={<SearchPage />} />
+                        {/* <Route path="search/:query" element={<SearchPage />} /> */}
+                        <Route path="search" element={<SearchPage />} />
                         <Route path="user/:id" element={<ProfilePage />} />
                         <Route path="blog/:blog_id" element={<BlogPage />}/>
                         <Route path="*" element={<PageNotFound />} /> 

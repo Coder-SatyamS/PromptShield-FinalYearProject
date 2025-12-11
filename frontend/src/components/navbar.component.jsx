@@ -42,13 +42,22 @@ const Navbar = () => {
         setUserNavPanel(currentVal => !currentVal);
     }
 
-    const handleSearch = (e) => {
-        let query = e.target.value;
+    // const handleSearch = (e) => {
+    //     let query = e.target.value;
         
-        if(e.keyCode == 13 && query.length){
-            navigate(`/search/${query}`);
+    //     if(e.keyCode == 13 && query.length){
+    //         navigate(`/search/${query}`);
+    //     }
+    // }
+
+    const handleSearch = (e) => {
+        let query = e.target.value.trim();
+
+        if (e.keyCode === 13 && query.length) {
+            navigate(`/search?query=${encodeURIComponent(query)}`);
         }
-    }
+    };
+
 
     const handleBlur = () => {
         setTimeout(() => {
