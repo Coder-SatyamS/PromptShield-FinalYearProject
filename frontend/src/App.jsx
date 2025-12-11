@@ -16,7 +16,7 @@ import Notifications from "./pages/notifications.page";
 import ManageBlogs from "./pages/manage-blogs.page";
 import PromptAnalyzer from "./pages/prompt-analyzer.page";
 import AdminPage from "./pages/admin.page";
-import AdminDashboard from "./pages/admin-dashboard.page";
+{/*import AdminDashboard from "./pages/admin-dashboard.page";*/}
 
 
 export const UserContext = createContext({})
@@ -72,7 +72,7 @@ const App = () => {
                 <Routes>
                   <Route path="/analyze" element={<PromptAnalyzer />} />  {/*OK */} {/*OK@*/}
                   <Route path="/admin" element={<AdminRoute> <AdminPage /> </AdminRoute>}/>
-                  <Route path="/admin" element={<AdminDashboard />} />
+                  {/*<Route path="/admin" element={<AdminDashboard />} />  */}
                     <Route path="/editor" element={<Editor />} />
                     <Route path="/editor/:blog_id" element={<Editor />} />
                     <Route path="/" element={<Navbar />}> 
